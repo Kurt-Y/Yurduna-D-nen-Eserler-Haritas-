@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yurduna Dönen Kültürel Miras Haritası</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.1/dist/MarkerCluster.Default.css" />
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+</head>
+<body>
+<div id="welcome-overlay" class="overlay">
+    <div class="welcome-box">
+        <h1>Yurduna Dönen Eserler Haritası</h1>
+        <p>
+            Bu proje, yurt dışından Türkiye'ye iadesi başarıyla sağlanmış kültürel miras eserlerini keşfetmenizi sağlar. Harita üzerinde eserlerin nerede sergilendiğini görebilir, ayrıntılı bilgilerine ulaşabilir ve hikayelerini öğrenebilirsiniz.
+        </p>
+
+        <div class="welcome-buttons">
+            <button id="close-welcome" class="main-button">Haritayı Keşfet</button>
+            <button id="open-help" class="secondary-button">Yardım Menüsü</button>
+            <button id="start-game" class="secondary-button">Oyunu Başlat</button>
+        </div>
+    </div>
+</div>
+    <div id="map"></div>
+
+    <div id="search-container">
+        <div class="search-wrapper"><i class="fas fa-search search-icon"></i><input type="text" id="search-input" placeholder="Eser veya müze ara..."></div>
+        <div id="search-results-container" class="hidden"></div>
+    </div>
+    <div id="controls-container">
+        <button id="quiz-toggle-btn" class="control-btn" title="Oyunu Başlat"><i class="fas fa-gamepad"></i></button>
+        <button id="filter-icon" class="control-btn" title="Filtrele"><i class="fas fa-filter"></i></button>
+    </div>
+    <div id="settings-container">
+        <button id="settings-icon" class="control-btn" title="Ayarlar"><i class="fas fa-cog"></i></button>
+        <button id="help-icon" class="control-btn" title="Yardım"><i class="fas fa-question-circle"></i></button>
+        <div id="settings-dropdown" class="hidden">
+            <div class="setting-group">
+                <label data-lang-key="mapView">Harita Görünümü</label>
+                <div class="switch-container">
+                    <span data-lang-key="originLabel" class="switch-label active">Ait Olduğu Yer</span>
+                    <label class="switch"><input type="checkbox" id="map-view-switch"><span class="slider round"></span></label>
+                    <span data-lang-key="returnedLabel" class="switch-label">Getirildiği Yer</span>
+                </div>
+            </div>
+            <div class="setting-group"><label data-lang-key="viewType">Görünüm Türü</label><div class="switch-container"><span data-lang-key="map" class="switch-label active">Harita</span><label class="switch"><input type="checkbox" id="view-type-switch"><span class="slider round"></span></label><span data-lang-key="satellite" class="switch-label">Uydu</span></div></div>
+            <div class="setting-group"><label data-lang-key="theme">Tema</label><div class="switch-container"><span data-lang-key="light" class="switch-label active">Açık</span><label class="switch"><input type="checkbox" id="theme-switch"><span class="slider round"></span></label><span data-lang-key="dark" class="switch-label">Koyu</span></div></div>
+            <div class="setting-group"><label data-lang-key="language">Dil</label><div class="switch-container"><span class="switch-label active">TR</span><label class="switch"><input type="checkbox" id="lang-switch"><span class="slider round"></span></label><span class="switch-label">EN</span></div></div>
+        </div>
+    </div>
+    <div id="quiz-panel" class="hidden">
+        <div id="quiz-start-screen"><h3 data-lang-key="quizTitle">Konum Bulma Oyunu</h3><p data-lang-key="quizDescription">Rastgele seçilen 5 eserin konumunu haritada tahmin et. Her doğru tahmin 20 puan, her yanlış tahmin -5 puan!</p><button id="start-quiz-btn" data-lang-key="quizStartBtn">Oyuna Başla</button></div>
+        <div id="quiz-game-screen" class="hidden"><div class="quiz-header"><div class="quiz-stat"><span data-lang-key="quizScoreLabel">Puan:</span><span id="quiz-score">0</span></div><div class="quiz-stat"><span data-lang-key="quizQuestionLabel">Soru:</span><span id="quiz-question-counter">1 / 5</span></div></div><p id="quiz-question-text"></p><p id="quiz-hint-text" class="hidden"></p><button id="end-quiz-btn" data-lang-key="quizEndBtn">Oyunu Bitir</button></div>
+        <div id="quiz-end-screen" class="hidden"><h3 data-lang-key="quizGameOver">Oyun Bitti!</h3><p><span data-lang-key="quizFinalScoreLabel">Toplam Puan:</span> <span id="quiz-final-score">0</span></p><button id="play-again-btn" data-lang-key="quizPlayAgainBtn">Tekrar Oyna</button></div>
+    </div>
+    <div id="filter-modal" class="hidden">
+        <h3 data-lang-key="filterTitle">Eserleri Filtrele</h3>
+        <div class="filter-group"><label data-lang-key="filterReturnedCountry">Getirildiği Ülke:</label><div id="country-filter-container" class="checkbox-container"></div></div>
+        <div class="filter-group"><label data-lang-key="filterOriginCity">Ait Olduğu Şehir (TR):</label><div id="origin-city-filter-container" class="checkbox-container"></div></div>
+        <div class="filter-group"><label data-lang-key="filterExhibitionCity">Sergilendiği Şehir (TR):</label><div id="exhibition-city-filter-container" class="checkbox-container"></div></div>
+        <div class="filter-group"><label data-lang-key="filterPeriod">Eserin Dönemi:</label><div id="period-filter-container" class="checkbox-container"></div></div>
+        <div class="button-group"><button id="apply-filter-btn" data-lang-key="applyFilterBtn">Filtrele</button><button id="reset-filter-btn" data-lang-key="resetFilterBtn">Sıfırla</button></div>
+    </div>
+
+    <div id="intro-tour-overlay" class="modal-overlay hidden">
+        <div class="tutorial-step" data-step="1">
+            <h4 data-lang-key="introStep1Title">Hoş Geldiniz!</h4>
+            <p data-lang-key="introStep1Text">Bu harita, yurduna dönen eserlerimizi keşfetmeniz için hazırlandı. Kısaca özellikleri tanıyalım.</p>
+            <button class="tutorial-next" data-lang-key="tutorialNext">İleri</button>
+        </div>
+        <div class="tutorial-step" data-step="2">
+            <h4 data-lang-key="introStep2Title">Konum Bulma Oyunu</h4>
+            <p data-lang-key="introStep2Text">Bu buton ile eserlerin yerini tahmin etmeye dayalı eğlenceli bir oyun oynayabilirsiniz.</p>
+            <button class="tutorial-next" data-lang-key="tutorialNext">İleri</button>
+        </div>
+        <div class="tutorial-step" data-step="3">
+            <h4 data-lang-key="introStep3Title">Detaylı Yardım</h4>
+            <p data-lang-key="introStep3Text">Tüm özellikleri ve detayları öğrenmek isterseniz, dilediğiniz zaman bu yardım butonuna tıklayabilirsiniz.</p>
+            <button class="tutorial-next" data-lang-key="tutorialNext">İleri</button>
+        </div>
+        <div class="tutorial-step" data-step="4">
+            <h4 data-lang-key="introStep4Title">Keşfe Başla!</h4>
+            <p data-lang-key="introStep4Text">Artık haritayı keşfetmeye hazırsınız. İyi eğlenceler!</p>
+            <button class="tutorial-end" data-lang-key="tutorialEnd">Haritayı Keşfet</button>
+        </div>
+        <button id="intro-skip-btn" class="tutorial-skip" data-lang-key="tutorialSkip">Turu Atla</button>
+    </div>
+
+    <div id="tutorial-overlay" class="modal-overlay hidden">
+        <div class="tutorial-step" data-step="1">
+            <h4 data-lang-key="helpStep1Title">Detaylı Yardım</h4>
+            <p data-lang-key="helpStep1Text">Bu interaktif harita, yurt dışından Türkiye'ye iadesi başarıyla sağlanmış kültürel mirasımızı keşfetmeniz için tasarlandı. Gelin, tüm özellikleri detaylıca inceleyelim.</p>
+            <button class="tutorial-next" data-lang-key="tutorialNext">İleri</button>
+        </div>
+        <div class="tutorial-step" data-step="2">
+            <h4 data-lang-key="helpStep2Title">Harita ve Eserler</h4>
+            <p data-lang-key="helpStep2Text">Haritadaki yeşil daireler, o bölgedeki eser gruplarını gösterir. Yaklaştıkça veya tıkladıkça eserlerin tekil imleçleri görünür. Her imlece tıklayarak eserin kökeni, sergilendiği müze ve iade edildiği yer gibi detaylara ulaşabilirsiniz.</p>
+            <button class="tutorial-next" data-lang-key="tutorialNext">İleri</button>
+        </div>
+        <div class="tutorial-step" data-step="3">
+            <h4 data-lang-key="helpStep3Title">Arama</h4>
+            <p data-lang-key="helpStep3Text">Belirli bir eseri, müzeyi veya şehri bulmak için üstteki arama çubuğunu kullanabilirsiniz.</p>
+            <button class="tutorial-next" data-lang-key="tutorialNext">İleri</button>
+        </div>
+        <div class="tutorial-step" data-step="4">
+            <h4 data-lang-key="helpStep4Title">Filtreleme</h4>
+            <p data-lang-key="helpStep4Text">Eserleri; getirildiği ülkeye, Türkiye'deki köken şehrine, sergilendiği şehre veya ait olduğu döneme göre filtreleyerek aramanızı daraltabilirsiniz.</p>
+            <button class="tutorial-next" data-lang-key="tutorialNext">İleri</button>
+        </div>
+        <div class="tutorial-step" data-step="5">
+            <h4 data-lang-key="helpStep5Title">Konum Bulma Oyunu</h4>
+            <p data-lang-key="helpStep5Text">Oyunun amacı, sorulan eserin o anki harita görünümüne göre yerini tahmin etmektir. Eğer harita "Ait Olduğu Yer" modundaysa eserin kökenini, "Getirildiği Yer" modundaysa yurt dışındaki eski yerini tahmin etmeniz istenir. Doğru tahmin +20, yanlış tahmin -5 puandır.</p>
+            <button class="tutorial-next" data-lang-key="tutorialNext">İleri</button>
+        </div>
+        <div class="tutorial-step" data-step="6">
+            <h4 data-lang-key="helpStep6Title">Ayarlar</h4>
+            <p data-lang-key="helpStep6Text">Bu menüden harita görünümünü (Ait Olduğu Yer / Getirildiği Yer), harita türünü (Harita / Uydu), temayı (Açık / Koyu) ve dili (TR / EN) değiştirebilirsiniz.</p>
+            <button class="tutorial-next" data-lang-key="tutorialNext">İleri</button>
+        </div>
+        <div class="tutorial-step" data-step="7">
+            <h4 data-lang-key="helpStep7Title">Harita Kontrolleri</h4>
+            <p data-lang-key="helpStep7Text">Haritaya yakınlaşmak ve uzaklaşmak için bu kontrol butonlarını kullanabilirsiniz.</p>
+            <button class="tutorial-end" data-lang-key="tutorialEnd">Anladım</button>
+        </div>
+        <button id="tutorial-skip-btn" class="tutorial-skip" data-lang-key="tutorialSkip">Kapat</button>
+    </div>
+
+    <div id="model-viewer-modal" class="modal-overlay hidden"><button id="close-model-viewer" class="close-modal-btn">&times;</button><model-viewer id="artifact-model" src="" ar camera-controls touch-action="pan-y" auto-rotate shadow-intensity="1" alt="Eserin 3D Modeli"></model-viewer></div>
+    <div id="debug-counter" style="position: absolute; bottom: 10px; left: 10px; z-index: 2000; background: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 5px; font-family: monospace; font-size: 14px;"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.1/dist/leaflet.markercluster.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
