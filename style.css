@@ -44,14 +44,12 @@ input:checked + .slider:before { transform: translateX(24px); }
 .tutorial-next, .tutorial-end { padding: 8px 15px; background-color: var(--primary-color); color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; width: 100%; }
 .tutorial-skip { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: none; border: none; color: #ccc; cursor: pointer; text-decoration: underline; z-index: 2002; }
 #filter-modal { position: absolute; top: 60px; left: 10px; z-index: 1101; background: var(--modal-bg); color: var(--text-color); padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: 320px; }
-.filter-group { margin-bottom: 10px; }
 .button-group { display: flex; justify-content: space-between; margin-top: 20px; }
 .button-group button { width: 48%; padding: 10px; border: none; border-radius: 4px; color: white; font-size: 16px; cursor: pointer; }
 #apply-filter-btn { background-color: var(--primary-color); }
 #reset-filter-btn { background-color: var(--secondary-color); }
 .checkbox-container { max-height: 100px; overflow-y: auto; border: 1px solid var(--control-border); padding: 10px; border-radius: 4px; }
 .filter-group { margin-bottom: 10px; }
-
 
 /* 6. POPUP STYLING & 3D ICON */
 .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--modal-bg) !important; color: var(--text-color) !important; }
@@ -65,7 +63,7 @@ input:checked + .slider:before { transform: translateX(24px); }
 #artifact-model { width: 90%; height: 90%; border: none; --progress-bar-color: #fff; }
 .close-modal-btn { position: absolute; top: 20px; right: 20px; font-size: 35px; color: #fff; background: none; border: none; cursor: pointer; z-index: 2001; }
 
-/* 8. TUTORIAL POSITIONS */
+/* 8. TUTORIAL POSITIONS (Orta ve Büyük Ekranlar İçin Konumlar) */
 #intro-tour-overlay .tutorial-step[data-step="1"],
 #intro-tour-overlay .tutorial-step[data-step="4"],
 #tutorial-overlay .tutorial-step[data-step="1"],
@@ -161,4 +159,93 @@ input:checked + .slider:before { transform: translateX(24px); }
 .secondary-button:hover {
     background-color: #5a6268;
 }
-/* YENİ EKLENMESİ GEREKEN KOD SONU */
+
+/* ========================================================== */
+/* 10. MOBİL UYARLAMA (Media Queries) */
+/* ========================================================== */
+@media (max-width: 768px) {
+    
+    /* 3. SEARCH BAR & CONTROLS */
+    #search-container {
+        width: calc(100% - 100px); /* Kontrol butonları için yer bırak */
+        left: 50%;
+        transform: translateX(-50%);
+        top: 60px; /* Kontrol butonlarının altına al */
+    }
+
+    #controls-container {
+        top: 10px;
+        left: 10px;
+    }
+
+    #settings-container {
+        top: 10px;
+        right: 10px;
+        gap: 5px;
+    }
+    
+    .control-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+
+    /* 4. SETTINGS DROPDOWN */
+    #settings-dropdown {
+        top: 50px;
+        right: 0;
+        left: auto;
+        width: 200px;
+        padding: 10px;
+    }
+    
+    /* 5. GENERAL MODAL STYLES */
+    #filter-modal {
+        top: 115px; /* Kontroller ve arama çubuğunun altına al */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 95%;
+        max-width: 380px;
+        padding: 15px;
+    }
+    
+    .checkbox-container {
+        max-height: 120px; /* Mobil için biraz daha uzun */
+    }
+
+    /* 9. QUIZ PANEL STYLES */
+    #quiz-panel {
+        top: 115px; /* Filtre menüsü ile aynı seviyede olabilir */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 95%;
+        max-width: 380px;
+        padding: 15px;
+    }
+
+    /* 6. POPUP STYLING */
+    .leaflet-popup-content {
+        max-width: 280px !important;
+        font-size: 13px;
+    }
+
+    .popup-image {
+        max-width: 150px;
+    }
+    
+    /* 8. TUTORIAL POSITIONS (Mobil cihazlarda ortala) */
+    .tutorial-step {
+        width: 90%;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        top: 50% !important;
+        text-align: center;
+    }
+
+    #intro-tour-overlay .tutorial-step[data-step="2"],
+    #intro-tour-overlay .tutorial-step[data-step="3"] {
+        top: 50% !important; 
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+    }
+}
